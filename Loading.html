@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sea of Ra</title>
+<style>
+  html,body{margin:0;height:100%;background:#0a121c}
+  #splash{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(ellipse at 50% 40%,#1c3f5e 0%,#0a121c 78%);color:#f2d48a;font-family:Georgia,serif;text-align:center;transition:opacity .7s ease;overflow:hidden}
+  #splash.out{opacity:0;pointer-events:none}
+  #splash .pre{font-size:15px;letter-spacing:.35em;text-transform:uppercase;color:#cfa650;opacity:0;animation:spIn 1s .2s forwards}
+  #splash h1{margin:0;font-size:clamp(40px,9vw,84px);letter-spacing:.12em;text-shadow:0 0 28px rgba(255,190,70,.45),0 3px 0 #5a3a10;opacity:0;animation:spIn 1.1s .6s forwards}
+  #splash .tag{font-size:14px;color:#a9b8c6;font-style:italic;opacity:0;animation:spIn 1s 1.1s forwards}
+  #splash svg{width:min(280px,60vw);height:auto;animation:spBob 3.2s ease-in-out infinite}
+  #splash .bar{width:min(320px,70vw);height:10px;border-radius:6px;border:1px solid #8a6a2e;background:rgba(0,0,0,.4);overflow:hidden;margin-top:6px}
+  #splash .bar i{display:block;height:100%;width:0;background:linear-gradient(#ffd56a,#c68a1c);border-radius:6px;transition:width .5s ease}
+  #splash .msg{font-size:13px;color:#b9c6d2;min-height:18px}
+  #splash button{margin-top:4px;padding:10px 22px;border-radius:10px;border:2px solid #e7c25f;background:linear-gradient(#d9a93a,#a8741a);color:#2a1706;font:700 15px Georgia,serif;cursor:pointer;display:none}
+  @keyframes spIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes spBob{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-7px) rotate(1.5deg)}}
+</style></head><body>
+<div id="splash"><div class="pre">YASEMSOXO uvádí</div>
+  <svg viewBox="0 0 280 190" aria-hidden="true"><g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M140 18v110" stroke="#5a3a18" stroke-width="5"/><path d="M146 22l30 6-30 6z" fill="#e0b13c" stroke="none"/>
+    <path d="M136 34c-34 8-52 28-56 52 20-8 40-10 56-6z" fill="#efe3c4" stroke="#8a6a2e" stroke-width="2"/>
+    <path d="M144 34c34 8 52 28 56 52-20-8-40-10-56-6z" fill="#e6d6ad" stroke="#8a6a2e" stroke-width="2"/>
+    <path d="M136 92c-24 4-42 14-50 28 14-4 30-4 50-2z" fill="#efe3c4" stroke="#8a6a2e" stroke-width="2"/>
+    <path d="M144 92c24 4 42 14 50 28-14-4-30-4-50-2z" fill="#e6d6ad" stroke="#8a6a2e" stroke-width="2"/>
+    <path d="M62 126h156c-6 26-30 40-78 40S68 152 62 126z" fill="#6b3f18" stroke="#2f1a08" stroke-width="3"/>
+    <path d="M70 138h140" stroke="#c68a1c" stroke-width="3"/><circle cx="106" cy="148" r="4" fill="#2f1a08" stroke="none"/><circle cx="140" cy="150" r="4" fill="#2f1a08" stroke="none"/><circle cx="174" cy="148" r="4" fill="#2f1a08" stroke="none"/>
+    <path d="M20 174c20-10 40 10 60 0s40 10 60 0 40 10 60 0 40 10 60 0" stroke="#4aa3d8" stroke-width="5" opacity=".75"/>
+    <path d="M10 184c20-10 40 10 60 0s40 10 60 0 40 10 60 0 40 10 60 0 40 10 50 0" stroke="#2f7fb0" stroke-width="4" opacity=".6"/></g></svg>
+  <h1>SEA OF RA</h1><div class="tag">Pirátské moře na tebe čeká</div>
+  <div class="bar"><i id="spBar"></i></div><div class="msg" id="spMsg">Zvedáme kotvy…</div><button id="spBtn">Zkusit znovu</button></div>
+<script>
+// ÚVODNÍ STRÁNKA: ukáže načítací obrazovku, mezitím probudí herní server (Render ho po 15 min bez hráčů uspí) a pak přepne do hry.
+var GAME_URL = 'https://seaofra.onrender.com/';   // adresa hry (sem případně napiš jinou)
+(function () {
+  var bar = document.getElementById('spBar'), msg = document.getElementById('spMsg'), btn = document.getElementById('spBtn'), t0 = Date.now(), ready = false, gone = false, tries = 0;
+  var txt = ['Zvedáme kotvy…', 'Budíme posádku…', 'Plníme sudy prachem…', 'Natahujeme plachty…', 'Hledáme poklady…'];
+  var iv = setInterval(function () {
+    var s = (Date.now() - t0) / 1000; if (ready || gone) return;
+    bar.style.width = Math.min(92, 92 * (1 - Math.exp(-s / 25))) + '%';   // ukazatel zpomaluje; do 100 % dojde až když server odpoví
+    msg.textContent = s > 20 ? 'Server se probouzí, ještě chvilku…' : txt[Math.floor(s / 4) % txt.length];
+  }, 300);
+  function go() { if (gone) return; gone = true; clearInterval(iv); bar.style.width = '100%'; msg.textContent = 'Hotovo! Plujeme…'; setTimeout(function () { location.href = GAME_URL; }, 900); }
+  function ping() {
+    tries++; var ac = new AbortController(), to = setTimeout(function () { ac.abort(); }, 8000);
+    fetch(GAME_URL.replace(/\/?$/, '/') + 'health?x=' + Date.now(), { signal: ac.signal, cache: 'no-store' })
+      .then(function (r) { return r.text(); })
+      .then(function (t) { clearTimeout(to); if (t.trim() === 'ok') { ready = true; var w = 3200 - (Date.now() - t0); setTimeout(go, Math.max(0, w)); } else retry(); })
+      .catch(function () { clearTimeout(to); retry(); });
+  }
+  function retry() { if (ready) return; if (Date.now() - t0 > 120000) { msg.textContent = 'Server neodpovídá. Zkus to za chvíli.'; btn.style.display = 'inline-block'; clearInterval(iv); return; } setTimeout(ping, 2500); }
+  btn.onclick = function () { location.reload(); };
+  ping();
+})();
+</script></body></html>
